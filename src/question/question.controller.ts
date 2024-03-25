@@ -8,6 +8,7 @@ import {
   // HttpException,
   // HttpStatus,
   Post,
+  Delete,
 } from '@nestjs/common';
 import { QuestionDto } from './dto/question.dto';
 import { QuestionService } from './question.service';
@@ -28,16 +29,22 @@ export class QuestionController {
   }
 
   @Get()
-  findAll(
+  async findAll(
     @Query('keyword') keyword: string,
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,
   ) {
-    console.log(keyword, page, pageSize);
+    const list = await this.questionService.findAllList({
+      keyword,
+      page,
+      pageSize,
+    });
+
+    const count = await this.questionService.countAll({ keyword });
 
     return {
-      list: ['a', 'b', 'c'],
-      count: 10,
+      list,
+      count,
     };
   }
 
@@ -48,12 +55,11 @@ export class QuestionController {
 
   @Patch(':id')
   updateOne(@Param('id') id: string, @Body() questionDto: QuestionDto) {
-    console.log('questionDto', questionDto);
+    return this.questionService.update(id, questionDto);
+  }
 
-    return {
-      id,
-      title: 'aaa',
-      desc: 'bbb',
-    };
+  @Delete(':id')
+  deleteOne(@Param('id') id: string) {
+    return this.questionService.delete(id);
   }
 }

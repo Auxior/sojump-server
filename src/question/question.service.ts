@@ -18,7 +18,39 @@ export class QuestionService {
     return await question.save();
   }
 
+  async delete(id: string) {
+    return await this.questionModel.findByIdAndDelete(id);
+  }
+
+  async update(id: string, updateData) {
+    return await this.questionModel.updateOne({ _id: id }, updateData);
+  }
+
   async findOne(id: string) {
     return await this.questionModel.findById(id);
+  }
+
+  async findAllList({ keyword = '', page = 1, pageSize = 10 }) {
+    const whereOpt: any = {};
+    if (keyword) {
+      const reg = new RegExp(keyword, 'i');
+      whereOpt.title = { $regex: reg }; // 模糊搜索
+    }
+
+    return await this.questionModel
+      .find(whereOpt)
+      .sort({ _id: -1 }) // 逆序排序
+      .skip((page - 1) * pageSize) // 分页
+      .limit(pageSize);
+  }
+
+  async countAll({ keyword = '' }) {
+    const whereOpt: any = {};
+    if (keyword) {
+      const reg = new RegExp(keyword, 'i');
+      whereOpt.title = { $regex: reg }; // 模糊搜索
+    }
+
+    return await this.questionModel.countDocuments(whereOpt);
   }
 }
