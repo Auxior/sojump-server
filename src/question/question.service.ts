@@ -28,20 +28,41 @@ export class QuestionService {
     return await question.save();
   }
 
-  async delete(id: string) {
-    return await this.questionModel.findByIdAndDelete(id);
+  async delete(id: string, author: string) {
+    // return await this.questionModel.findByIdAndDelete(id);
+    const res = await this.questionModel.findOneAndDelete({ _id: id, author });
+    return res;
   }
 
-  async update(id: string, updateData) {
-    return await this.questionModel.updateOne({ _id: id }, updateData);
+  async deleteMany(ids: string[], author: string) {
+    const res = await this.questionModel.deleteMany({
+      _id: { $in: ids },
+      author,
+    });
+    return res;
+  }
+
+  async update(id: string, updateData, author) {
+    return await this.questionModel.updateOne({ _id: id, author }, updateData);
   }
 
   async findOne(id: string) {
     return await this.questionModel.findById(id);
   }
 
-  async findAllList({ keyword = '', page = 1, pageSize = 10 }) {
-    const whereOpt: any = {};
+  async findAllList({
+    keyword = '',
+    page = 1,
+    pageSize = 10,
+    isDeleted = false,
+    isStar,
+    author = '',
+  }) {
+    const whereOpt: any = {
+      author,
+      isDeleted,
+    };
+    if (isStar != null) whereOpt.isStar = isStar;
     if (keyword) {
       const reg = new RegExp(keyword, 'i');
       whereOpt.title = { $regex: reg }; // 模糊搜索
@@ -54,8 +75,12 @@ export class QuestionService {
       .limit(pageSize);
   }
 
-  async countAll({ keyword = '' }) {
-    const whereOpt: any = {};
+  async countAll({ keyword = '', isDeleted = false, author = '', isStar }) {
+    const whereOpt: any = {
+      author,
+      isDeleted,
+    };
+    if (isStar != null) whereOpt.isStar = isStar;
     if (keyword) {
       const reg = new RegExp(keyword, 'i');
       whereOpt.title = { $regex: reg }; // 模糊搜索
