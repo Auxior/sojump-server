@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Question } from './schemas/question.schema';
 import { nanoid } from 'nanoid';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class QuestionService {
@@ -87,5 +88,24 @@ export class QuestionService {
     }
 
     return await this.questionModel.countDocuments(whereOpt);
+  }
+
+  async duplicate(id: string, author: string) {
+    const question = await this.questionModel.findById(id);
+    const newQuestion = new this.questionModel({
+      ...question.toObject(),
+      _id: new mongoose.Types.ObjectId(), // 生成一个新的 mongodb ObjectId
+      title: question.title + ' 副本',
+      author,
+      isPublished: false,
+      isStar: false,
+      componentList: question.componentList.map((item) => {
+        return {
+          ...item,
+          fe_id: nanoid(),
+        };
+      }),
+    });
+    return await newQuestion.save();
   }
 }
