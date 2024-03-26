@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { QuestionDto } from './dto/question.dto';
 import { QuestionService } from './question.service';
+import { Public } from 'src/auth/decorators/public.decorator';
 
 @Controller('question')
 export class QuestionController {
@@ -63,6 +64,7 @@ export class QuestionController {
     };
   }
 
+  @Public()
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.questionService.findOne(id);
