@@ -18,7 +18,7 @@ export class AnswerService {
 
   async count(questionId: string) {
     if (!questionId) return 0;
-    return await this.answerModel.count({ questionId });
+    return await this.answerModel.countDocuments({ questionId });
   }
 
   async findAll(questionId: string, opt: { page: number; pageSize: number }) {
